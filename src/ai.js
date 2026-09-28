@@ -1,0 +1,3 @@
+export class GuardAI{
+ update(npc,player,dt){if(npc.dead)return 'down';const d=npc.d(player),v=player.g.position.clone().sub(npc.g.position).setY(0),dir=v.clone().normalize();if(npc.alert>.5){if(d>1.45){npc.g.position.addScaledVector(dir,dt*(npc.alert>.85?2.2:1.3));npc.g.lookAt(player.g.position.x,player.g.position.y+.9,player.g.position.z);return 'pursue'}if(npc.cool<=0){npc.attack(Math.random()<.2?'heavy':'light');return 'attack'}return 'pressure'}return 'search';}
+}
