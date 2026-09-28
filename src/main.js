@@ -11,6 +11,28 @@ function part(g,geo,pos,mat,scale){const o=new THREE.Mesh(geo,mat);o.position.co
 function limb(g,a,b,r,m){const v=b.clone().sub(a),n=v.length(),o=new THREE.Mesh(new THREE.CapsuleGeometry(r,n,6,12),m);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());o.castShadow=o.receiveShadow=true;g.add(o);return o}
 function makeBody(g,color,player){
  const top=C(color,.44),skinM=skin,hairM=hair;
+ if(player){
+   const jacket=C(0x262936,.34),pants=C(0x181a22,.52),accent=C(0xb54250,.3);
+   part(g,new THREE.CapsuleGeometry(.45,.74,8,18),new THREE.Vector3(0,1.36,0),jacket,new THREE.Vector3(1.08,1,.76));
+   part(g,new THREE.CylinderGeometry(.34,.40,.24,18),new THREE.Vector3(0,.93,0),pants);
+   part(g,new THREE.SphereGeometry(.295,28,20),new THREE.Vector3(0,2.14,0),skinM);
+   part(g,new THREE.SphereGeometry(.315,28,18,0,Math.PI*2,0,Math.PI*.62),new THREE.Vector3(0,2.2,0),hairM,new THREE.Vector3(1.02,1.08,1));
+   part(g,new THREE.SphereGeometry(.19,18,14),new THREE.Vector3(0,2.17,.27),hairM,new THREE.Vector3(.72,1.35,1.15));
+   part(g,new THREE.SphereGeometry(.11,16,12),new THREE.Vector3(-.20,2.20,-.18),hairM);
+   part(g,new THREE.SphereGeometry(.11,16,12),new THREE.Vector3(.20,2.20,-.18),hairM);
+   part(g,new THREE.SphereGeometry(.032,10,8),new THREE.Vector3(-.105,2.15,-.275),black);
+   part(g,new THREE.SphereGeometry(.032,10,8),new THREE.Vector3(.105,2.15,-.275),black);
+   part(g,new THREE.SphereGeometry(.035,10,8),new THREE.Vector3(0,2.045,-.30),skinM);
+   part(g,new THREE.BoxGeometry(.11,.20,.04),new THREE.Vector3(-.17,1.72,-.36),accent);
+   part(g,new THREE.BoxGeometry(.11,.20,.04),new THREE.Vector3(.17,1.72,-.36),accent);
+   part(g,new THREE.TorusGeometry(.34,.028,8,24),new THREE.Vector3(0,1.02,0),accent).rotation.x=Math.PI/2;
+   part(g,new THREE.BoxGeometry(.18,.20,.04),new THREE.Vector3(0,1.40,-.39),accent);
+   limb(g,new THREE.Vector3(-.19,.84,0),new THREE.Vector3(-.24,.38,0),.15,pants);
+   limb(g,new THREE.Vector3(.19,.84,0),new THREE.Vector3(.24,.38,0),.15,pants);
+   part(g,new THREE.BoxGeometry(.29,.16,.52),new THREE.Vector3(-.24,.13,-.09),black);
+   part(g,new THREE.BoxGeometry(.29,.16,.52),new THREE.Vector3(.24,.13,-.09),black);
+   return;
+ }
  part(g,new THREE.CapsuleGeometry(.43,.72,8,16),new THREE.Vector3(0,1.35,0),top,new THREE.Vector3(1.05,1,.72));
  part(g,new THREE.CylinderGeometry(.31,.38,.22,16),new THREE.Vector3(0,.91,0),black);
  part(g,new THREE.SphereGeometry(.29,24,18),new THREE.Vector3(0,2.13,0),skinM);
