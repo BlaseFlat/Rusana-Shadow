@@ -31,6 +31,10 @@ function makeBody(g,color,player){
    limb(g,new THREE.Vector3(.19,.84,0),new THREE.Vector3(.24,.38,0),.15,pants);
    part(g,new THREE.BoxGeometry(.29,.16,.52),new THREE.Vector3(-.24,.13,-.09),black);
    part(g,new THREE.BoxGeometry(.29,.16,.52),new THREE.Vector3(.24,.13,-.09),black);
+   const atk=new THREE.Group();atk.position.set(.39,1.62,0);g.add(atk);
+   limb(atk,new THREE.Vector3(0,0,0),new THREE.Vector3(.23,-.5,.02),.12,skinM);
+   limb(atk,new THREE.Vector3(.23,-.5,.02),new THREE.Vector3(.17,-.9,.03),.105,skinM);
+   g.userData.attackArm=atk;
    return;
  }
  part(g,new THREE.CapsuleGeometry(.43,.72,8,16),new THREE.Vector3(0,1.35,0),top,new THREE.Vector3(1.05,1,.72));
