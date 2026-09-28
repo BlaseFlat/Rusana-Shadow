@@ -23,8 +23,7 @@ function makeBody(g,color,player){
  // shoulders / arms
  limb(g,new THREE.Vector3(-.39,1.62,0),new THREE.Vector3(-.62,1.12,.02),.12,skinM);
  limb(g,new THREE.Vector3(-.62,1.12,.02),new THREE.Vector3(-.56,.72,.03),.105,skinM);
- limb(g,new THREE.Vector3(.39,1.62,0),new THREE.Vector3(.62,1.12,.02),.12,skinM);
- limb(g,new THREE.Vector3(.62,1.12,.02),new THREE.Vector3(.56,.72,.03),.105,skinM);
+ const atk=new THREE.Group();atk.position.set(.39,1.62,0);g.add(atk);limb(atk,new THREE.Vector3(0,0,0),new THREE.Vector3(.23,-.5,.02),.12,skinM);limb(atk,new THREE.Vector3(.23,-.5,.02),new THREE.Vector3(.17,-.9,.03),.105,skinM);g.userData.attackArm=atk;
  // gloves
  part(g,new THREE.SphereGeometry(.115,14,10),new THREE.Vector3(-.56,.66,.03),player?red:black);
  part(g,new THREE.SphereGeometry(.115,14,10),new THREE.Vector3(.56,.66,.03),player?red:black);
@@ -38,7 +37,7 @@ function makeBody(g,color,player){
  part(g,new THREE.BoxGeometry(.16,.34,.035),new THREE.Vector3(0,1.43,-.365),metal);
  if(player){part(g,new THREE.TorusGeometry(.31,.035,10,28),new THREE.Vector3(0,1.0,0),red).rotation.x=Math.PI/2;}
 }
-class Fighter{constructor(color,player=false){this.player=player;this.g=new THREE.Group();this.hp=100;this.st=100;this.cool=0;this.at=0;this.kind='light';this.alert=0;this.dead=false;makeBody(this.g,color,player);this.arm=new THREE.Group();this.arm.position.set(.38,1.62,0);this.g.add(this.arm);S.add(this.g)}
+class Fighter{constructor(color,player=false){this.player=player;this.g=new THREE.Group();this.hp=100;this.st=100;this.cool=0;this.at=0;this.kind='light';this.alert=0;this.dead=false;makeBody(this.g,color,player);this.arm=this.g.userData.attackArm;S.add(this.g)}
 f(){return new THREE.Vector3(0,0,-1).applyQuaternion(this.g.quaternion)}d(o){return this.g.position.distanceTo(o.g.position)}attack(k='light'){if(this.at||this.cool||this.st<(k==='heavy'?24:10)||this.dead)return false;this.kind=k;this.at=.001;this.cool=k==='heavy'?.48:.27;this.st-=k==='heavy'?24:10;return true}hit(d,dir){if(this.dead)return;this.hp-=d;this.g.position.addScaledVector(dir,.16);if(this.hp<=0){this.dead=true;this.g.rotation.x=-Math.PI/2;this.g.position.y=.25}}update(dt){this.cool=Math.max(0,this.cool-dt);this.st=Math.min(100,this.st+dt*17);if(this.at){this.at+=dt;const dur=this.kind==='heavy'?.62:.38,p=clamp(this.at/dur,0,1),q=Math.sin(p*Math.PI);this.arm.rotation.x=-q*1.65;this.arm.rotation.y=(this.kind==='heavy'?-0.75:0)*q;if(p>=1){this.at=0;this.arm.rotation.set(0,0,0)}}}}const rus=new Fighter(0x343946,true),g1=new Fighter(0x3d3338),g2=new Fighter(0x29333d);rus.g.position.set(0,0,7);g1.g.position.set(0,0,-4);g2.g.position.set(5,0,-9);g1.g.rotation.y=g2.g.rotation.y=Math.PI;
 const keys={};let stealth=false,combat=false,threat=0,last=0,dodgeT=0,invulnerable=0;addEventListener('keydown',e=>{keys[e.code]=1;if(e.code==='Space'&&!dodgeT){dodgeT=.32;invulnerable=.28;rus.g.position.addScaledVector(rus.f(),-1.05);msg('DODGE')} if(e.code.startsWith('Shift'))stealth=true;if(e.code==='KeyJ'||e.code==='Space')attack();if(e.code==='KeyK')attack('heavy')});addEventListener('keyup',e=>{keys[e.code]=0;if(e.code.startsWith('Shift'))stealth=false});addEventListener('mousedown',e=>e.button===0&&attack());
 function attack(k='light'){if(rus.attack(k)){combat=true;document.body.classList.add('combat');msg(k==='heavy'?'HEAVY STRIKE':'STRIKE')}}
