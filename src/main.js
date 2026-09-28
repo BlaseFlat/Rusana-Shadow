@@ -45,7 +45,7 @@ function updateAttack(dt){if(!attackState)return;attackState.t+=dt;const hitAt=a
 function move(dt){
  if(attackState)return;
  const x=(keys.KeyD?1:0)-(keys.KeyA?1:0),z=(keys.KeyS?1:0)-(keys.KeyW?1:0);const v=new THREE.Vector3(x,0,z);
- if(v.lengthSq()){v.normalize();const sp=hidden?1.55:3.1;rus.group.position.addScaledVector(v,dt*sp);rus.group.rotation.y=Math.atan2(v.x,v.z)+Math.PI;rus.play(hidden?'walk':'walk',{fade:.15,loop:true,timeScale:hidden?.72:1})}
+ if(v.lengthSq()){v.normalize();const sp=hidden?1.55:3.1;rus.group.position.addScaledVector(v,dt*sp);rus.group.rotation.y=Math.atan2(v.x,v.z)+Math.PI;rus.play('walk',{fade:.15,loop:true,timeScale:hidden?.72:1,restart:false})}
  else rus.play('idle',{fade:.18,loop:true,restart:false});
  collide(rus.group.position,.38,gym,[g1,g2].filter(x=>x&&!x.dead).map(x=>({x:x.group.position.x,z:x.group.position.z,r:.38})));
 }
@@ -54,7 +54,7 @@ function enemyAI(g,dt){
  const d=dist(g,rus),v=rus.group.position.clone().sub(g.group.position).setY(0),dir=v.clone().normalize(),angle=Math.acos(clamp(forward(g).dot(dir),-1,1));
  const sees=d<8&&angle<.72&&!hidden;
  if(sees)g.alert=Math.min(1,g.alert+dt*1.35);else g.alert=Math.max(0,g.alert-dt*.35);
- if(g.alert>.55){combat=true;if(d>1.45){g.group.position.addScaledVector(dir,dt*(g.alert>.82?2.0:1.15));g.group.lookAt(rus.group.position.x,1,rus.group.position.z);g.play('walk',{fade:.16,loop:true,timeScale:g.alert>.82?1.05:.8})}else if(!g.attack&&g.hp>0&&g.cool<=0){g.cool=.75+Math.random()*.35;g.play(Math.random()<.25?'flinch':'idle',{fade:.08,loop:true})}}
+ if(g.alert>.55){combat=true;if(d>1.45){g.group.position.addScaledVector(dir,dt*(g.alert>.82?2.0:1.15));g.group.lookAt(rus.group.position.x,1,rus.group.position.z);g.play('walk',{fade:.16,loop:true,timeScale:g.alert>.82?1.05:.8,restart:false})}else if(!g.attack&&g.hp>0&&g.cool<=0){g.cool=.75+Math.random()*.35;g.play(Math.random()<.25?'flinch':'idle',{fade:.08,loop:true})}}
  else g.play('idle',{fade:.2,loop:true,restart:false});
  collide(g.group.position,.38,gym,[rus,g1,g2].filter(x=>x!==g&&!x.dead).map(x=>({x:x.group.position.x,z:x.group.position.z,r:.38})));
 }
