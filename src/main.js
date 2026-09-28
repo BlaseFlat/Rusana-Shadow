@@ -6,10 +6,40 @@ const combatSystem=new CombatSystem(),stealthSystem=new StealthSystem(),guardAI=
 const C=(c,r=.6)=>new THREE.MeshStandardMaterial({color:c,roughness:r}),S=new THREE.Scene(),R=new THREE.WebGLRenderer({antialias:true});S.background=new THREE.Color(0x07090d);S.fog=new THREE.Fog(0x10131a,12,40);R.setPixelRatio(Math.min(devicePixelRatio,1.7));R.setSize(innerWidth,innerHeight);R.shadowMap.enabled=true;document.body.appendChild(R.domElement);
 const cam=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.05,80),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));cam.position.set(6,5,11);S.add(new THREE.HemisphereLight(0x9eb4d0,0x141116,1.8));const sun=new THREE.DirectionalLight(0xffd7c2,3);sun.position.set(-5,9,4);sun.castShadow=true;S.add(sun);
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),C(0x24262b,.8));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;S.add(floor);const wall=C(0x171a20,.8);function box(x,y,z,a,b,c,m=wall){const o=new THREE.Mesh(new THREE.BoxGeometry(a,b,c),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;S.add(o)}box(0,2,-14,28,4,1);box(-14,2,0,1,4,28);box(14,2,0,1,4,28);
-const skin=C(0xd9a17f,.7),hair=C(0x19151a,.35),red=C(0x9e3f4b,.4);function limb(g,a,b,r,m){const v=b.clone().sub(a),n=v.length(),o=new THREE.Mesh(new THREE.CapsuleGeometry(r,n,5,10),m);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());g.add(o)}
-class Fighter{constructor(color,player=false){this.player=player;this.g=new THREE.Group();this.hp=100;this.st=100;this.cool=0;this.at=0;this.kind='light';this.alert=0;this.dead=false;const t=new THREE.Mesh(new THREE.CapsuleGeometry(.34,.82,6,12),C(color,.45));t.position.y=1.35;this.g.add(t);const h=new THREE.Mesh(new THREE.SphereGeometry(.255,20,16),skin);h.position.y=2.12;this.g.add(h);const ha=new THREE.Mesh(new THREE.SphereGeometry(.27,20,12,0,Math.PI*2,0,Math.PI*.58),hair);ha.position.y=2.18;this.g.add(ha);this.arm=new THREE.Group();this.arm.position.set(.38,1.62,0);this.g.add(this.arm);limb(this.arm,new THREE.Vector3(),new THREE.Vector3(.08,-.48,.02),.11,skin);limb(this.arm,new THREE.Vector3(.08,-.48,.02),new THREE.Vector3(.08,-.9,.08),.095,skin);if(player){const b=new THREE.Mesh(new THREE.TorusGeometry(.3,.035,8,24),red);b.rotation.x=Math.PI/2;b.position.y=1.02;this.g.add(b)}S.add(this.g)}
-f(){return new THREE.Vector3(0,0,-1).applyQuaternion(this.g.quaternion)}d(o){return this.g.position.distanceTo(o.g.position)}attack(k='light'){if(this.at||this.cool||this.st<(k==='heavy'?24:10)||this.dead)return false;this.kind=k;this.at=.001;this.cool=k==='heavy'?.48:.27;this.st-=k==='heavy'?24:10;return true}hit(d,dir){if(this.dead)return;this.hp-=d;this.g.position.addScaledVector(dir,.16);if(this.hp<=0){this.dead=true;this.g.rotation.x=-Math.PI/2;this.g.position.y=.25}}update(dt){this.cool=Math.max(0,this.cool-dt);this.st=Math.min(100,this.st+dt*17);if(this.at){this.at+=dt;const dur=this.kind==='heavy'?.62:.38,p=clamp(this.at/dur,0,1),q=Math.sin(p*Math.PI);this.arm.rotation.x=-q*1.65;this.arm.rotation.y=(this.kind==='heavy'?-0.75:0)*q;if(p>=1){this.at=0;this.arm.rotation.set(0,0,0)}}}}
-const rus=new Fighter(0x343946,true),g1=new Fighter(0x3d3338),g2=new Fighter(0x29333d);rus.g.position.set(0,0,7);g1.g.position.set(0,0,-4);g2.g.position.set(5,0,-9);g1.g.rotation.y=g2.g.rotation.y=Math.PI;
+const skin=C(0xd6a07f,.72),hair=C(0x151218,.28),red=C(0xb54250,.36),black=C(0x101217,.5),cloth=C(0x343845,.48),metal=C(0x777d8a,.28);
+function part(g,geo,pos,mat,scale){const o=new THREE.Mesh(geo,mat);o.position.copy(pos);if(scale)o.scale.copy(scale);o.castShadow=o.receiveShadow=true;g.add(o);return o}
+function limb(g,a,b,r,m){const v=b.clone().sub(a),n=v.length(),o=new THREE.Mesh(new THREE.CapsuleGeometry(r,n,6,12),m);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());o.castShadow=o.receiveShadow=true;g.add(o);return o}
+function makeBody(g,color,player){
+ const top=C(color,.44),skinM=skin,hairM=hair;
+ part(g,new THREE.CapsuleGeometry(.43,.72,8,16),new THREE.Vector3(0,1.35,0),top,new THREE.Vector3(1.05,1,.72));
+ part(g,new THREE.CylinderGeometry(.31,.38,.22,16),new THREE.Vector3(0,.91,0),black);
+ part(g,new THREE.SphereGeometry(.29,24,18),new THREE.Vector3(0,2.13,0),skinM);
+ part(g,new THREE.SphereGeometry(.305,24,16,0,Math.PI*2,0,Math.PI*.6),new THREE.Vector3(0,2.2,0),hairM,new THREE.Vector3(1,1,.96));
+ part(g,new THREE.CylinderGeometry(.055,.075,.18,10),new THREE.Vector3(0,1.82,0),skinM);
+ // face
+ part(g,new THREE.SphereGeometry(.035,10,8),new THREE.Vector3(-.105,2.15,-.255),black);
+ part(g,new THREE.SphereGeometry(.035,10,8),new THREE.Vector3(.105,2.15,-.255),black);
+ part(g,new THREE.SphereGeometry(.04,10,8),new THREE.Vector3(0,2.045,-.285),skinM);
+ // shoulders / arms
+ limb(g,new THREE.Vector3(-.39,1.62,0),new THREE.Vector3(-.62,1.12,.02),.12,skinM);
+ limb(g,new THREE.Vector3(-.62,1.12,.02),new THREE.Vector3(-.56,.72,.03),.105,skinM);
+ limb(g,new THREE.Vector3(.39,1.62,0),new THREE.Vector3(.62,1.12,.02),.12,skinM);
+ limb(g,new THREE.Vector3(.62,1.12,.02),new THREE.Vector3(.56,.72,.03),.105,skinM);
+ // gloves
+ part(g,new THREE.SphereGeometry(.115,14,10),new THREE.Vector3(-.56,.66,.03),player?red:black);
+ part(g,new THREE.SphereGeometry(.115,14,10),new THREE.Vector3(.56,.66,.03),player?red:black);
+ // legs
+ limb(g,new THREE.Vector3(-.19,.82,0),new THREE.Vector3(-.24,.38,0),.16,cloth);
+ limb(g,new THREE.Vector3(.19,.82,0),new THREE.Vector3(.24,.38,0),.16,cloth);
+ // boots
+ part(g,new THREE.BoxGeometry(.27,.16,.48),new THREE.Vector3(-.24,.13,-.08),black);
+ part(g,new THREE.BoxGeometry(.27,.16,.48),new THREE.Vector3(.24,.13,-.08),black);
+ // clothing detail
+ part(g,new THREE.BoxGeometry(.16,.34,.035),new THREE.Vector3(0,1.43,-.365),metal);
+ if(player){part(g,new THREE.TorusGeometry(.31,.035,10,28),new THREE.Vector3(0,1.0,0),red).rotation.x=Math.PI/2;}
+}
+class Fighter{constructor(color,player=false){this.player=player;this.g=new THREE.Group();this.hp=100;this.st=100;this.cool=0;this.at=0;this.kind='light';this.alert=0;this.dead=false;makeBody(this.g,color,player);this.arm=new THREE.Group();this.arm.position.set(.38,1.62,0);this.g.add(this.arm);S.add(this.g)}
+f(){return new THREE.Vector3(0,0,-1).applyQuaternion(this.g.quaternion)}d(o){return this.g.position.distanceTo(o.g.position)}attack(k='light'){if(this.at||this.cool||this.st<(k==='heavy'?24:10)||this.dead)return false;this.kind=k;this.at=.001;this.cool=k==='heavy'?.48:.27;this.st-=k==='heavy'?24:10;return true}hit(d,dir){if(this.dead)return;this.hp-=d;this.g.position.addScaledVector(dir,.16);if(this.hp<=0){this.dead=true;this.g.rotation.x=-Math.PI/2;this.g.position.y=.25}}update(dt){this.cool=Math.max(0,this.cool-dt);this.st=Math.min(100,this.st+dt*17);if(this.at){this.at+=dt;const dur=this.kind==='heavy'?.62:.38,p=clamp(this.at/dur,0,1),q=Math.sin(p*Math.PI);this.arm.rotation.x=-q*1.65;this.arm.rotation.y=(this.kind==='heavy'?-0.75:0)*q;if(p>=1){this.at=0;this.arm.rotation.set(0,0,0)}}}}const rus=new Fighter(0x343946,true),g1=new Fighter(0x3d3338),g2=new Fighter(0x29333d);rus.g.position.set(0,0,7);g1.g.position.set(0,0,-4);g2.g.position.set(5,0,-9);g1.g.rotation.y=g2.g.rotation.y=Math.PI;
 const keys={};let stealth=false,combat=false,threat=0,last=0,dodgeT=0,invulnerable=0;addEventListener('keydown',e=>{keys[e.code]=1;if(e.code==='Space'&&!dodgeT){dodgeT=.32;invulnerable=.28;rus.g.position.addScaledVector(rus.f(),-1.05);msg('DODGE')} if(e.code.startsWith('Shift'))stealth=true;if(e.code==='KeyJ'||e.code==='Space')attack();if(e.code==='KeyK')attack('heavy')});addEventListener('keyup',e=>{keys[e.code]=0;if(e.code.startsWith('Shift'))stealth=false});addEventListener('mousedown',e=>e.button===0&&attack());
 function attack(k='light'){if(rus.attack(k)){combat=true;document.body.classList.add('combat');msg(k==='heavy'?'HEAVY STRIKE':'STRIKE')}}
 function msg(t){const e=document.querySelector('#message');e.textContent=t;e.style.opacity=1;setTimeout(()=>e.style.opacity=0,350)}
